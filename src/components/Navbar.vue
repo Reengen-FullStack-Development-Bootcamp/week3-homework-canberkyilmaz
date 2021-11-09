@@ -1,7 +1,7 @@
 <template>
   <nav>
     <v-app-bar app text color="indigo" dark>
-      <v-toolbar-title class="text-uppercase grey--text text--lighten-2">
+      <v-toolbar-title class="logo text-uppercase grey--text text--lighten-2">
         <span class="font-weight-light">Canberk</span>
         <span class="font-weight-bold">Yılmaz</span>
       </v-toolbar-title>
@@ -25,6 +25,14 @@
         >
           ABOUT
         </v-btn>
+      </v-toolbar-items>
+      <v-toolbar-items class="admin-switch">
+        <v-switch v-model="isAdmin">
+          <template v-slot:label>
+            <span v-show="isAdmin" class="input__label">Admin</span>
+            <span v-show="!isAdmin" class="input__label">Guest</span>
+          </template>
+        </v-switch>
       </v-toolbar-items>
       <!-- <v-toolbar-items>
         <v-btn
@@ -54,9 +62,18 @@ export default {
   data() {
     return {
       drawer: false,
+      isAdmin: { true: "Admin", false: "User" },
     };
   },
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.admin-switch {
+  position: fixed;
+  margin-top: 10px;
+}
+.logo {
+  margin-top: 20px;
+}
+</style>
