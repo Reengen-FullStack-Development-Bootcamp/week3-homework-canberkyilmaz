@@ -26,11 +26,27 @@
           ABOUT
         </v-btn>
       </v-toolbar-items>
+      <v-toolbar-items
+        v-if="$store.state.userStatus === 'Admin'"
+        class="d-none d-sm-flex"
+      >
+        <v-btn
+          text
+          to="/logs"
+          class="text-uppercase grey--text text--lighten-4"
+        >
+          Logs
+        </v-btn>
+      </v-toolbar-items>
       <v-toolbar-items class="admin-switch">
-        <v-switch v-model="isAdmin">
+        <v-switch
+          @click="setUserLevel"
+          v-model="isAdmin"
+          true-value="Admin"
+          false-value="Guest"
+        >
           <template v-slot:label>
-            <span v-show="isAdmin" class="input__label">Admin</span>
-            <span v-show="!isAdmin" class="input__label">Guest</span>
+            <span>{{ isAdmin }}</span>
           </template>
         </v-switch>
       </v-toolbar-items>
@@ -43,6 +59,7 @@
           SEARCH
         </v-btn>
       </v-toolbar-items> -->
+      <div>{{ isAdmin.false }}</div>
     </v-app-bar>
     <!-- Add a navigation bar -->
     <v-navigation-drawer v-model="drawer" absolute temporary>
@@ -50,21 +67,37 @@
         <v-list-item-group>
           <v-list-item to="/"> HOME </v-list-item>
           <v-list-item to="/about"> ABOUT </v-list-item>
+          <v-list-item v-if="$store.state.userStatus === 'Admin'" to="/logs">
+            LOGS
+          </v-list-item>
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
+
     <!-- Navigation bar ends -->
   </nav>
 </template>
 
 <script>
+import { mapActions, mapMutations } from "vuex";
+
 export default {
   data() {
     return {
       drawer: false,
-      isAdmin: { true: "Admin", false: "User" },
+      isAdmin: "Admin",
     };
   },
+  methods: {
+    ...mapActions(["setUser"]),
+    ...mapMutations(["SET_USER_STATUS"]),
+    setUserLevel() {
+      this.setUser(this.isAdmin);
+    },
+  },
+  created() {
+    this.setUserLevel()
+  }
 };
 </script>
 

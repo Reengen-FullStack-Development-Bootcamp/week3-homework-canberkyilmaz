@@ -12,6 +12,7 @@ export default new Vuex.Store({
     apikey: process.env.VUE_APP_API_KEY,
     stockData: {},
     symbolsFound: [],
+    userStatus: ["Admin", "Guest"],
   },
   mutations: {
     SET_RESULT(state, payload) {
@@ -20,8 +21,14 @@ export default new Vuex.Store({
     SET_SYMBOLS_FOUND(state, payload) {
       state.symbolsFound = payload;
     },
+    SET_USER_STATUS(state, payload) {
+      state.userStatus = payload;
+    },
   },
   actions: {
+    setUser({ commit }, payload) {
+      commit("SET_USER_STATUS", payload);
+    },
     searchSymbol({ state, commit }, payload) {
       axios
         .get(`${state.apiURL}`, {
