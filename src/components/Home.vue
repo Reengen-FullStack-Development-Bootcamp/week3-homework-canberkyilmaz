@@ -17,33 +17,42 @@
           </v-form>
         </v-card-text>
         <v-divider></v-divider>
-
-        <v-expand-transition>
-          <v-list v-if="symbols.length > 0" class="indigo lighten-3">
-            <v-list-item
-              v-for="(symbol, i) in symbols"
-              :key="symbol.value['1. symbol']"
-              @click="setTicker(symbol.value['1. symbol'])"
-              :ref="i"
-            >
-              <v-list-item-avatar
-                color="indigo lighten-2"
-                class="text-h4 font-weight-light"
-              >
-                {{ symbol.value["1. symbol"].charAt(0) }}
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-title
-                  v-text="symbol.value['2. name']"
-                ></v-list-item-title>
-                <v-list-item-subtitle
-                  v-text="symbol.value['1. symbol']"
-                ></v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-expand-transition>
-
+        <v-expansion-panels popout v-model="panels" multiple>
+          <v-expansion-panel class="indigo darken-1">
+            <v-expansion-panel-header>
+              Search Results
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-expand-transition>
+                <v-list v-if="symbols.length > 0" class="indigo lighten-3">
+                  <v-list-item-group>
+                    <v-list-item
+                      v-for="symbol in symbols"
+                      :key="symbol.value['1. symbol']"
+                      @click="setTicker(symbol.value['1. symbol'])"
+                      link
+                    >
+                      <v-list-item-avatar
+                        color="indigo lighten-2"
+                        class="text-h4 font-weight-light"
+                      >
+                        {{ symbol.value["1. symbol"].charAt(0) }}
+                      </v-list-item-avatar>
+                      <v-list-item-content>
+                        <v-list-item-title
+                          v-text="symbol.value['2. name']"
+                        ></v-list-item-title>
+                        <v-list-item-subtitle
+                          v-text="symbol.value['1. symbol']"
+                        ></v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-list-item-group>
+                </v-list>
+              </v-expand-transition>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="indigo darken-1" @click="searchTicker">
@@ -66,27 +75,27 @@
           <h4>Selected Frequency: {{ selectedTimeSeries }}</h4>
         </v-col>
       </v-row>
-
       <template>
-        <v-tabs color="indigo">
-          <v-tab v-for="item in items" :key="item" @click="setTimeSeries(item)"
-            >{{ item }} TIME SERIES</v-tab
+        <v-tabs centered color="indigo" show-arrows>
+          <v-tab
+            v-for="item in items"
+            :key="item"
+            @click="
+              setTimeSeries(item);
+              setStockSeries();
+            "
+            >{{ item }}</v-tab
           >
         </v-tabs>
       </template>
-      <v-btn color="indigo darken-1" @click="setStockSeries">
-        GET ME THE CHART
-        <v-icon right color="white"> mdi-magnify </v-icon>
-      </v-btn>
-      <div v-if="this.selectedTicker && this.selectedTimeSeries">
-        <p>{{ this.$store.state.stockData }}</p>
-      </div>
+      <DrawChart :timeSeries="selectedTimeSeries" />
     </v-container>
   </v-app>
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapState, mapGetters } from "vuex";
+import DrawChart from "@/components/DrawChart.vue";
 
 export default {
   data: () => ({
@@ -96,10 +105,12 @@ export default {
     model: null,
     searchValue: "",
     search: "",
-    selectedTicker: null,
+    selectedTicker: "AMZN",
     items: ["DAILY", "WEEKLY", "MONTHLY"],
-    selectedTimeSeries: "",
+    selectedTimeSeries: "DAILY",
+    panels: [],
   }),
+  components: { DrawChart },
 
   computed: {
     symbols() {
@@ -115,10 +126,19 @@ export default {
 
     ...mapActions(["searchStockSeries"]),
     ...mapState(["symbolsFound"]),
+    ...mapGetters(["getFrequencyTag"]),
+  },
+  mounted() {
+    this.setStockSeries();
   },
   methods: {
     searchTicker() {
       this.$store.dispatch("searchSymbol", this.searchValue);
+      if (this.searchValue.length > 0) {
+        this.panels = [0];
+      } else {
+        this.panels = [];
+      }
     },
     setStockSeries() {
       if (this.selectedTicker && this.selectedTimeSeries) {
@@ -131,11 +151,10 @@ export default {
 
     setTicker(ticker) {
       this.selectedTicker = ticker;
-      console.log(this.selectedTicker);
+      this.panels = [];
     },
     setTimeSeries(timeSeries) {
       this.selectedTimeSeries = timeSeries;
-      console.log(this.selectedTimeSeries);
     },
   },
   watch: {
