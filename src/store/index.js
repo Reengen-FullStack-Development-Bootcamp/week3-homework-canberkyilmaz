@@ -10,7 +10,6 @@ export default new Vuex.Store({
     number: 0,
     apiURL: "https://www.alphavantage.co/query",
     apikey: process.env.VUE_APP_API_KEY,
-    headers: { "User-Agent": "Canberk LLC" },
     stockData: {},
     symbolsFound: [],
   },
@@ -26,7 +25,7 @@ export default new Vuex.Store({
     searchSymbol({ state, commit }, payload) {
       axios
         .get(`${state.apiURL}`, {
-          headers: { ...state.headers },
+          // headers: { ...state.headers },
           params: {
             function: "SYMBOL_SEARCH",
             keywords: payload,
@@ -34,7 +33,6 @@ export default new Vuex.Store({
           },
         })
         .then((res) => {
-          console.log(res);
           commit("SET_SYMBOLS_FOUND", res.data.bestMatches);
         })
         .catch((err) => console.error(err));
@@ -42,7 +40,6 @@ export default new Vuex.Store({
     searchStockSeries({ state, commit }, payload) {
       axios
         .get(`${state.apiURL}`, {
-          headers: { ...state.headers },
           params: {
             function: `TIME_SERIES_${payload.selectedTimeSeries}`,
             apikey: state.apikey,
@@ -50,12 +47,48 @@ export default new Vuex.Store({
           },
         })
         .then((res) => {
-          console.log(res);
           commit("SET_RESULT", res.data);
         })
         .catch((err) => console.error(err));
     },
   },
-  getters: {},
+  getters: {
+    getFrequencyTag: (state) => (freq) => {
+      let frequencyTag = "";
+
+      freq = freq[0].toUpperCase() + freq.toLowerCase().slice(1, freq.length);
+
+      switch (freq) {
+        case "Daily":
+          frequencyTag = `Time Series (${freq})`;
+          break;
+
+        case "Weekly":
+          frequencyTag = `${freq} Time Series`;
+          break;
+
+        case "Monthly":
+          frequencyTag = `${freq} Time Series`;
+          break;
+
+        default:
+          break;
+      }
+
+      const timeSeriesData = state.stockData[frequencyTag];
+      if (timeSeriesData) {
+        return Object.keys(timeSeriesData).map((key) => {
+          return {
+            date: key,
+            open: parseFloat(timeSeriesData[key]["1. open"]),
+            high: parseFloat(timeSeriesData[key]["2. high"]),
+            low: parseFloat(timeSeriesData[key]["3. low"]),
+            close: parseFloat(timeSeriesData[key]["4. close"]),
+            volume: parseFloat(timeSeriesData[key]["5. volume"]),
+          };
+        });
+      }
+    },
+  },
   modules: {},
 });
