@@ -11,6 +11,7 @@
     <v-card class="rounded-lg grey lighten-5 mt-5">
       <div ref="chart"></div>
     </v-card>
+    <div v-if="loadingStatus">Loading</div>
     <!-- <v-row>
       {{ getFrequencyTag(this.timeSeries) }}
     </v-row> -->
@@ -28,7 +29,10 @@ export default {
     return {};
   },
   computed: {
-    ...mapGetters(["getFrequencyTag"]),
+    ...mapGetters(["getFrequencyTag", "loadingStatus"]),
+    loadingStatus() {
+      return this.$store.state.loadingStatus;
+    },
   },
   methods: {
     drawChart() {
@@ -143,10 +147,10 @@ export default {
             f((y1 - y0) / y0)
         )(d3.format("+.2%"));
         title = (i) => `${formatDate(X[i])}
-Open: ${formatValue(Yo[i])}
-Close: ${formatValue(Yc[i])} (${formatChange(Yo[i], Yc[i])})
-Low: ${formatValue(Yl[i])}
-High: ${formatValue(Yh[i])}`;
+        Open: ${formatValue(Yo[i])}
+        Close: ${formatValue(Yc[i])} (${formatChange(Yo[i], Yc[i])})
+        Low: ${formatValue(Yl[i])}
+        High: ${formatValue(Yh[i])}`;
       } else if (title !== null) {
         const T = d3.map(data, title);
         title = (i) => T[i];

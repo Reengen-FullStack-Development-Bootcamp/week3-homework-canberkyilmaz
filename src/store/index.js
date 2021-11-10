@@ -13,6 +13,7 @@ export default new Vuex.Store({
     stockData: {},
     symbolsFound: [],
     userStatus: ["Admin", "Guest"],
+    loadingStatus: false,
   },
   mutations: {
     SET_RESULT(state, payload) {
@@ -24,12 +25,17 @@ export default new Vuex.Store({
     SET_USER_STATUS(state, payload) {
       state.userStatus = payload;
     },
+    LOADING_STATUS(state, newLoadingStatus) {
+      state.loadingStatus = newLoadingStatus;
+    },
   },
   actions: {
     setUser({ commit }, payload) {
       commit("SET_USER_STATUS", payload);
     },
     searchSymbol({ state, commit }, payload) {
+      commit("LOADING_STATUS", true);
+
       axios
         .get(`${state.apiURL}`, {
           // headers: { ...state.headers },
@@ -42,9 +48,16 @@ export default new Vuex.Store({
         .then((res) => {
           commit("SET_SYMBOLS_FOUND", res.data.bestMatches);
         })
-        .catch((err) => console.error(err));
+        .catch((err) => console.error(err))
+        .finally(
+          () => (
+            commit("LOADING_STATUS", false), console.log(state.loadingStatus)
+          )
+        );
     },
     searchStockSeries({ state, commit }, payload) {
+      commit("LOADING_STATUS", true);
+      console.log(state.loadingStatus);
       axios
         .get(`${state.apiURL}`, {
           params: {
@@ -56,7 +69,12 @@ export default new Vuex.Store({
         .then((res) => {
           commit("SET_RESULT", res.data);
         })
-        .catch((err) => console.error(err));
+        .catch((err) => console.error(err))
+        .finally(
+          () => (
+            commit("LOADING_STATUS", false), console.log(state.loadingStatus)
+          )
+        );
     },
   },
   getters: {
