@@ -17,12 +17,11 @@ Stock charts with Vue.js and D3.js using API
 </h3>
 
   <p align="center">
-    Stock charts with Vue.js and D3.js using API
     <br />
     <a href="https://github.com/canberk-yilmaz/stock-charts-vue-d3"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="#">View Demo-FIX</a>
+    <a href="https://vuestockcharts.vercel.app/">View Demo</a>
     ·
     <a href="https://github.com/canberk-yilmaz/stock-charts-vue-d3issues">Report Bug</a>
     ·
@@ -49,19 +48,19 @@ Stock charts with Vue.js and D3.js using API
     </li>
     
   </ol>
-</details>◊
+</details>
 
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
 
-[![][product-screenshot]](https://github.com/canberk-yilmaz/vue-hotel-app)
+[![][product-screenshot]](https://github.com/canberk-yilmaz/stock-charts-vue-d3)
 
 ### Built With
 
 - [Vue.js](https://vuejs.org/)
 - [Vue Router](https://router.vuejs.org/)
-- [Vuex](https://vuex.vuejs.org/)◊
+- [Vuex](https://vuex.vuejs.org/)
 - [Vuetify](https://vuetifyjs.com/)
 
 ### Project Setup
@@ -95,7 +94,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[license-url]: https://github.com/canberk-yilmaz/vue-hotel-app/blob/master/LICENSE.txt
+[license-url]: https://github.com/canberk-yilmaz/stock-charts-vue-d3/blob/master/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/canberkyilmaz/
-[product-screenshot]: src/assets/hotel-app-demo.gif
+[product-screenshot]: src/assets/vuestockcharts.gif
