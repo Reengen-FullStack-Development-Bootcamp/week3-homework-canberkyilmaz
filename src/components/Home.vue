@@ -29,7 +29,10 @@
                     <v-list-item
                       v-for="symbol in symbols"
                       :key="symbol.value['1. symbol']"
-                      @click="setTicker(symbol.value['1. symbol'])"
+                      @click="
+                        setSymbol(symbol.value['1. symbol']);
+                        setStockSeries();
+                      "
                       link
                     >
                       <v-list-item-avatar
@@ -69,14 +72,58 @@
           </v-btn>
         </v-card-actions>
       </v-card>
-      <v-row>
-        <v-col>
-          <h4>Selected Ticker: {{ selectedTicker }}</h4>
-          <h4>Selected Frequency: {{ selectedTimeSeries }}</h4>
+      <v-row justify="center" align="center">
+        <v-col d-flex justify-center>
+          <h3
+            v-show="
+              this.$store.state.selectedTicker && this.formattedTimeSeries
+            "
+            class="
+              indigo
+              lighten-2
+              mt-4
+              pa-2
+              grey--text
+              text--lighten-4 text-center
+              stock-info
+            "
+          >
+            Selected Ticker: {{ this.$store.state.selectedTicker.toUpperCase() }}
+          </h3>
+
+          <h3
+            v-show="
+              this.$store.state.selectedTicker && this.formattedTimeSeries
+            "
+            class="
+              indigo
+              lighten-2
+              mt-1
+              pa-2
+              grey--text
+              text--lighten-4 text-center
+              stock-info
+            "
+          >
+            Selected Frequency: {{ this.$store.state.selectedTimeSeries }}
+          </h3>
         </v-col>
       </v-row>
-      <template>
+      <!-- <template>
         <v-tabs centered color="indigo" show-arrows>
+          <v-tab @click="setTimeSeries">DAILY</v-tab>
+          <v-tab>WEEKLY</v-tab>
+          <v-tab>MONTHLY</v-tab>
+        </v-tabs>
+      </template>-->
+      <template>
+        <v-tabs
+          v-show="this.$store.state.selectedTicker && this.formattedTimeSeries"
+          centered
+          color="indigo lighten-2"
+          show-arrows
+          class="pa-4"
+        >
           <v-tab
             v-for="item in items"
             :key="item"
@@ -87,30 +134,35 @@
             >{{ item }}</v-tab
           >
         </v-tabs>
+        <v-divider></v-divider>
       </template>
-      <DrawChart :timeSeries="selectedTimeSeries" />
+
+      <!-- <div>
+        {{ formattedTimeSeries }}
+      </div> -->
+      <!-- <div>
+        {{ this.$store.getters.timeSeriesArray }}
+      </div> -->
+      <router-view></router-view>
     </v-container>
   </v-app>
 </template>
 
 <script>
-import { mapActions, mapState, mapGetters } from "vuex";
-import DrawChart from "@/components/DrawChart.vue";
+import { mapActions, mapState, mapGetters, mapMutations } from "vuex";
 
 export default {
+  name: "Home",
   data: () => ({
     descriptionLimit: 60,
     entries: [],
     isLoading: false,
-    model: null,
     searchValue: "",
     search: "",
-    selectedTicker: "AMZN",
-    items: ["DAILY", "WEEKLY", "MONTHLY"],
     selectedTimeSeries: "DAILY",
     panels: [],
+    items: ["DAILY", "WEEKLY", "MONTHLY"],
   }),
-  components: { DrawChart },
 
   computed: {
     symbols() {
@@ -124,9 +176,23 @@ export default {
       });
     },
 
+    formattedTimeSeries() {
+      return this.$store.getters.apiTimeSeriesFormat;
+    },
+
     ...mapActions(["searchStockSeries"]),
     ...mapState(["symbolsFound"]),
-    ...mapGetters(["getFrequencyTag"]),
+    ...mapGetters(["apiTimeSeriesFormat", "timeSeriesArray"]),
+    ...mapMutations([]),
+  },
+
+  watch: {
+    searchValue() {
+      // to stay within api limits search will start after 3 characters.
+      if (this.searchValue.length === 0 || this.searchValue.length >= 3) {
+        this.searchTicker();
+      }
+    },
   },
   mounted() {
     this.setStockSeries();
@@ -140,32 +206,33 @@ export default {
         this.panels = [];
       }
     },
-    setStockSeries() {
-      if (this.selectedTicker && this.selectedTimeSeries) {
-        this.$store.dispatch("searchStockSeries", {
-          selectedTicker: this.selectedTicker,
-          selectedTimeSeries: this.selectedTimeSeries,
-        });
-      }
-    },
-
-    setTicker(ticker) {
-      this.selectedTicker = ticker;
+    setSymbol(ticker) {
+      this.$store.commit("SET_TICKER", ticker);
       this.panels = [];
+      this.$router.push({ name: "Symbol", params: { ticker } });
+      this.searchValue = "";
     },
     setTimeSeries(timeSeries) {
-      this.selectedTimeSeries = timeSeries;
+      this.$store.commit("SET_TIME_SERIES", timeSeries);
     },
-  },
-  watch: {
-    searchValue() {
-      // to stay within api limits search will start after 3 characters.
-      if (this.searchValue.length === 0 || this.searchValue.length >= 3) {
-        this.searchTicker();
+    setStockSeries() {
+      if (this.$store.state.selectedTicker && this.formattedTimeSeries) {
+        this.$store.dispatch("searchStockSeries", {
+          selectedTicker: this.$store.state.selectedTicker,
+          selectedTimeSeries: this.formattedTimeSeries,
+        });
+        // console.log(this.$store.state.stockDataSeries);
+        // console.log("get", this.$store.getters.timeSeriesArray);
       }
     },
   },
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+
+.stock-info {
+  border-radius: 0.5rem;
+}
+
+</style>
