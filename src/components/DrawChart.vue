@@ -63,7 +63,7 @@ export default {
           newArr = this.timeSeriesArray.slice(1, 50);
           break;
         case "MONTHLY":
-          newArr = this.timeSeriesArray.slice(1, 15);
+          newArr = this.timeSeriesArray.slice(1, 20);
           break;
         default:
           break;
@@ -78,6 +78,7 @@ export default {
         close = (d) => d.close, // given d in data, returns a (quantitative) y-value
         high = (d) => d.high, // given d in data, returns a (quantitative) y-value
         low = (d) => d.low, // given d in data, returns a (quantitative) y-value
+        volume = (d) => d.volume, // given d in data, returns a (quantitative) y-value
         title, // given d in data, returns the title text
         marginTop = 20, // top margin, in pixels
         marginRight = 30, // right margin, in pixels
@@ -91,6 +92,7 @@ export default {
         xTicks, // array of x-values to label (defaults to every other Monday)
         yType = d3.scaleLinear, // type of y-scale
         yDomain, // [ymin, ymax]
+        yVolDomain, // [ymin, ymax]
         yRange = [height - marginBottom, marginTop], // [bottom, top]
         xFormat = "%b %-d", // a format specifier for the date on the x-axis
         yFormat = "~f", // a format specifier for the value on the y-axis
@@ -105,6 +107,7 @@ export default {
       const Yc = d3.map(data, close);
       const Yh = d3.map(data, high);
       const Yl = d3.map(data, low);
+      const Yvol = d3.map(data, volume);
       const I = d3.range(X.length);
 
       const weeks = (start, stop, stride) =>
@@ -116,7 +119,8 @@ export default {
 
       // Compute default domains and ticks.
       if (xDomain === undefined) xDomain = weekdays(d3.min(X), d3.max(X));
-      if (yDomain === undefined) yDomain = [d3.min(Yl), d3.max(Yh)];
+      if (yDomain === undefined) yDomain = [d3.min(Yl) - 50, d3.max(Yh)];
+      if (yVolDomain === undefined) yVolDomain = [d3.min(Yvol), d3.max(Yvol)];
       if (xTicks === undefined)
         xTicks = weeks(d3.min(xDomain), d3.max(xDomain), 2);
 
@@ -128,6 +132,7 @@ export default {
       // band scale, we specify explicit tick values.
       const xScale = d3.scaleBand(xDomain, xRange).padding(xPadding);
       const yScale = yType(yDomain, yRange);
+      const yVolScale = yType(yVolDomain, yRange);
       const xAxis = d3
         .axisBottom(xScale)
         .tickFormat(d3.utcFormat(xFormat))
@@ -146,7 +151,8 @@ export default {
         Open: ${formatValue(Yo[i])}
         Close: ${formatValue(Yc[i])} (${formatChange(Yo[i], Yc[i])})
         Low: ${formatValue(Yl[i])}
-        High: ${formatValue(Yh[i])}`;
+        High: ${formatValue(Yh[i])}
+        Volume: ${formatValue(Yvol[i])}`;
       } else if (title !== null) {
         const T = d3.map(data, title);
         title = (i) => T[i];
@@ -203,9 +209,16 @@ export default {
         .join("g")
         .attr("transform", (i) => `translate(${xScale(X[i])},0)`);
 
+      //volume
       g.append("line")
-        .attr("y1", (i) => yScale(Yl[i]))
-        .attr("y2", (i) => yScale(Yh[i]));
+        // .attr("y1", (i) => yScale(Yo[i]))
+
+        .attr("y1", (i) => height - yVolScale(Yvol[i]))
+        .attr("stroke-width", xScale.bandwidth())
+        .attr("stroke", (i) => colors[1 + Math.sign(Yo[i] - Yc[i])])
+        .attr("stroke-opacity", 0.1)
+        .attr("transform", (i) => `translate(0, ${yVolScale(Yvol[i])})`);
+      //volume
 
       g.append("line")
         .attr("y1", (i) => yScale(Yo[i]))
@@ -215,7 +228,7 @@ export default {
 
       if (title) g.append("title").text(title);
 
-      //  return svg.node();
+      /* Volume series bars */
     },
   },
   created() {
