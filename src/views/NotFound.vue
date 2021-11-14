@@ -1,6 +1,7 @@
 <template>
   <body class="body">
     <section class="notFound">
+      <!-- 404 Page Created Here -->
       <div class="img">
         <img
           src="https://assets.codepen.io/5647096/backToTheHomepage.png"
@@ -12,6 +13,7 @@
         />
       </div>
       <div class="text">
+        <!-- Redirect  -->
         <h1>404</h1>
         <h2>PAGE NOT FOUND</h2>
         <h3>BACK TO HOME?</h3>
@@ -27,6 +29,7 @@ export default {};
 </script>
 
 <style scoped>
+/* font imported */
 @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 
 * {
