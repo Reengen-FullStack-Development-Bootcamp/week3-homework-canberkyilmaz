@@ -1,8 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import store from "../store";
 import Home from "../views/Home.vue";
-import About from "../views/About.vue";
-import Logs from "../views/Logs.vue";
 
 Vue.use(VueRouter);
 
@@ -11,16 +10,28 @@ const routes = [
     path: "/",
     name: "Home",
     component: Home,
-  },
-  {
-    path: "/about",
-    name: "About",
-    component: About,
+    children: [
+      {
+        path: "/symbol/:ticker",
+        name: "Symbol",
+        component: () =>
+          import(
+            /* webpackChunkName: "DrawChart" */ "../components/DrawChart.vue"
+          ),
+      },
+    ],
   },
   {
     path: "/logs",
     name: "Logs",
-    component: Logs,
+    component: () => import(/* webpackChunkName: "Logs" */ "../views/Logs.vue"),
+  },
+  {
+    path: "/404",
+    alias: "*",
+    name: "notFound",
+    component: () =>
+      import(/* webpackChunkName: "NotFound" */ "../views/NotFound.vue"),
   },
 ];
 
@@ -28,6 +39,25 @@ const router = new VueRouter({
   mode: "history",
   base: process.env.BASE_URL,
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const history = localStorage.getItem("routingHistory")
+    ? JSON.parse(localStorage.getItem("routingHistory"))
+    : [];
+
+  const routeChanges = {
+    from: from.fullPath,
+    to: to.fullPath,
+    date: new Date(),
+    authorized: to.name === "Logs" ? store.getters.getUserStatus : true,
+
+  };
+
+  // console.log("route", routeChanges)
+  history.push(routeChanges);
+  localStorage.setItem("routingHistory", JSON.stringify([...history]));
+  next();
 });
 
 export default router;
