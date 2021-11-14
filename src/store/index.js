@@ -14,7 +14,6 @@ export default new Vuex.Store({
     symbolsFound: [],
     userStatus: "Admin",
     loadingStatus: false,
-    logs: ["deneme1", "deneme2"],
     selectedTicker: "",
     selectedTimeSeries: "DAILY",
   },
