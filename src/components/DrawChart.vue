@@ -1,20 +1,14 @@
 <template>
   <div class="text-center">
-    <!-- <h1>DrawChart</h1>
-    <h2>{{ timeSeries }}</h2> -->
-    <v-row class="mt-5 justify-center">
-      <v-btn dark color="indigo" @click="drawChart">
-        GET THE CHART
-        <v-icon large right color="white"> mdi-brush-variant </v-icon>
-      </v-btn>
-    </v-row>
+    <!-- {{ this.$store.state.selectedTicker }}
+    {{ this.$store.state.selectedTimeSeries }} -->
+    <div v-if="this.$store.state.loadingStatus">Please Wait...</div>
+
     <v-card class="rounded-lg grey lighten-5 mt-5">
       <div ref="chart"></div>
     </v-card>
-    <div v-if="loadingStatus">Loading</div>
-    <!-- <v-row>
-      {{ getFrequencyTag(this.timeSeries) }}
-    </v-row> -->
+    <div v-if="this.$store.state.loadingStatus">Loading</div>
+    <div v-else>{{ this.drawChart() }}</div>
   </div>
 </template>
 
@@ -24,24 +18,30 @@ import { mapGetters } from "vuex";
 
 export default {
   name: "DrawChart",
-  props: ["timeSeries"],
+
   data() {
     return {};
   },
   computed: {
-    ...mapGetters(["getFrequencyTag", "loadingStatus"]),
-    loadingStatus() {
-      return this.$store.state.loadingStatus;
+    ...mapGetters(["timeSeriesArray"]),
+    // loadingStatus() {
+    //   return this.$store.state.loadingStatus;
+    // },
+    formattedTimeSeries() {
+      return this.$store.getters.apiTimeSeriesFormat;
+    },
+    tickers() {
+      return this.$store.state.selectedTicker;
     },
   },
   methods: {
     drawChart() {
-      //console.log("drawchart");
       if (document.getElementById("chart")) {
         const chart = document.getElementById("chart");
-        this.$refs.chart.removeChild(chart);
+        if (this.$refs.chart) {
+          this.$refs.chart.removeChild(chart);
+        }
       }
-
       let obj = {
         date: (d) => new Date(d.date),
         high: (d) => d.high,
@@ -53,26 +53,22 @@ export default {
         width: 1300,
         height: 500,
       };
-      //console.log(this.timeSeries);
-      switch (this.timeSeries) {
+
+      let newArr = [];
+      switch (this.$store.state.selectedTimeSeries) {
+        case "DAILY":
+          newArr = this.timeSeriesArray.slice(1, 100);
+          break;
         case "WEEKLY":
-          this.retrieveGraph(
-            this.getFrequencyTag(this.timeSeries).slice(1, 50),
-            obj
-          );
+          newArr = this.timeSeriesArray.slice(1, 50);
           break;
-
         case "MONTHLY":
-          this.retrieveGraph(
-            this.getFrequencyTag(this.timeSeries).slice(1, 25),
-            obj
-          );
+          newArr = this.timeSeriesArray.slice(1, 15);
           break;
-
         default:
-          this.retrieveGraph(this.getFrequencyTag(this.timeSeries), obj);
           break;
       }
+      this.retrieveGraph(newArr, obj);
     },
     retrieveGraph(
       data,
@@ -222,13 +218,20 @@ export default {
       //  return svg.node();
     },
   },
+  created() {
+    if (this.$route.params.ticker) {
+      this.$store.commit("SET_TICKER", this.$route.params.ticker);
+      this.$store.getters.timeSeriesArray;
+    }
+  },
   watch: {
-    getFrequencyTag() {
-      // while (this.$refs.chart.firstChild) {
-      // 	this.$refs.chart.firstChild.remove();
-      // }
+    tickers() {
       this.drawChart();
     },
+  },
+  beforeDestroy() {
+    this.$store.commit("SET_RESULT_DATA", {});
+    this.$store.commit("SET_TICKER", "");
   },
 };
 </script>
