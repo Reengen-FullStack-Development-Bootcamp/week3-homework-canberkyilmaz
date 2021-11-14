@@ -20,13 +20,13 @@
       <v-toolbar-items class="d-none d-sm-flex">
         <v-btn
           text
-          to="/about"
+          to="/logs"
           class="text-uppercase grey--text text--lighten-4"
         >
-          ABOUT
+          LOGS
         </v-btn>
       </v-toolbar-items>
-      <v-toolbar-items
+      <!-- <v-toolbar-items
         v-if="$store.state.userStatus === 'Admin'"
         class="d-none d-sm-flex"
       >
@@ -37,7 +37,7 @@
         >
           Logs
         </v-btn>
-      </v-toolbar-items>
+      </v-toolbar-items> -->
       <v-toolbar-items class="admin-switch">
         <v-switch
           @click="setUserLevel"
@@ -66,10 +66,8 @@
       <v-list nav dense>
         <v-list-item-group>
           <v-list-item to="/"> HOME </v-list-item>
-          <v-list-item to="/about"> ABOUT </v-list-item>
-          <v-list-item v-if="$store.state.userStatus === 'Admin'" to="/logs">
-            LOGS
-          </v-list-item>
+          <!-- <v-list-item v-if="$store.state.userStatus === 'Admin'" to="/logs"> -->
+          <v-list-item to="/logs"> LOGS </v-list-item>
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
@@ -96,8 +94,8 @@ export default {
     },
   },
   created() {
-    this.setUserLevel()
-  }
+    this.setUserLevel();
+  },
 };
 </script>
 
